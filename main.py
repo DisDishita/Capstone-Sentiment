@@ -1,26 +1,31 @@
-# main.py
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.responses import FileResponse
 import pickle
 
 app = FastAPI()
 
-# Enable CORS so front-end can call API
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],  # Replace with your front-end URL if deployed
+    allow_origins=["*"],
     allow_methods=["*"],
     allow_headers=["*"]
 )
 
-# Load the trained model
+# Load model
 with open("model.pkl", "rb") as f:
     model = pickle.load(f)
 
+# Serve frontend
 @app.get("/")
 def home():
-    return {"message": "Sentiment Analysis API is running."}
+    return FileResponse("static/index.html")
 
+@app.get("/script.js")
+def js():
+    return FileResponse("static/script.js")
+
+# Prediction API
 @app.post("/predict")
 async def predict(data: dict):
     text = data.get("text", "")
